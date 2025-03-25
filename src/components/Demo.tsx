@@ -347,6 +347,15 @@ export default function Demo(
                 sdk.actions.viewProfile
               </pre>
             </div>
+            <ViewIcebreaker />
+          </div>
+
+          <div className="mb-4">
+            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg my-2">
+              <pre className="font-mono text-xs whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
+                sdk.actions.viewProfile
+              </pre>
+            </div>
             <ViewProfile />
           </div>
 
@@ -675,6 +684,46 @@ function SignIn() {
           </div>
         </div>
       )}
+    </>
+  );
+}
+function ViewIcebreaker() {
+  const [uid, setFid] = useState("3");
+  
+
+  return (
+    <>
+      <div>
+        <Label
+          className="text-xs font-semibold text-gray-500 mb-1"
+          htmlFor="view-profile-fid"
+        >
+          User ID
+        </Label>
+        <Input
+          id="view-profile-fid"
+          type="number"
+          value={uid}
+          className="mb-2"
+          onChange={(e) => {
+            setFid(e.target.value);
+          }}
+          step="1"
+          min="1"
+        />
+      </div>
+      <Button
+        onClick={() => {
+          const options = {method: 'GET', headers: {accept: 'application/json'}};
+
+          fetch('https://app.icebreaker.xyz/api/v1/fid/3/', options)
+            .then(res => res.json())
+            .then(res => console.log(res))
+            .catch(err => console.error(err));
+        }}
+      >
+        View Icebreaker
+      </Button>
     </>
   );
 }
