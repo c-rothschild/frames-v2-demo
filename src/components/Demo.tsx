@@ -29,6 +29,7 @@ import { BaseError, UserRejectedRequestError } from "viem";
 import { useSession } from "next-auth/react";
 import { createStore } from "mipd";
 import { Label } from "~/components/ui/label";
+import { IcebreakerGraph } from '~/components/IcebreakerGraph';
 
 
 export default function Demo(
@@ -325,28 +326,6 @@ export default function Demo(
 
           <div className="mb-4">
             <ViewIcebreaker />
-          </div>
-
-          <div className="mb-4">
-            <SignIn />
-          </div>
-
-          <div className="mb-4">
-            <Button onClick={openUrl}>Open Link</Button>
-          </div>
-
-          <div className="mb-4">
-            <Button onClick={openWarpcastUrl}>Open Warpcast Link</Button>
-          </div>
-
-          
-
-          <div className="mb-4">
-            <ViewProfile />
-          </div>
-
-          <div className="mb-4">
-            <Button onClick={close}>Close Frame</Button>
           </div>
         </div>
 
@@ -684,7 +663,6 @@ function ViewIcebreaker() {
     }
   };
     
-
   // Update the interface to match the actual data structure
   interface Channel {
     type: string;
@@ -741,6 +719,10 @@ function ViewIcebreaker() {
   const [iceData, setIceData] = useState<IcebreakerData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  // Add state for connections
+  const [connections, setConnections] = useState<IcebreakerProfile[]>([]);
+  const [connectionsLoading, setConnectionsLoading] = useState(false);
 
   const icebreaker = useCallback(async () => {
     setLoading(true);
@@ -750,6 +732,25 @@ function ViewIcebreaker() {
       const data = await response.json();
       console.log("Raw Icebreaker data:", data);
       setIceData(data);
+      
+      // Fetch connections for this user
+      if (data.profiles && data.profiles[0]) {
+        setConnectionsLoading(true);
+        try {
+          const connectionsResponse = await fetch(`/api/icebreaker/${uid}/connections`);
+          if (connectionsResponse.ok) {
+            const connectionsData = await connectionsResponse.json();
+            setConnections(connectionsData.profiles || []);
+            console.log("Connections:", connectionsData.profiles);
+          } else {
+            console.error("Failed to fetch connections:", connectionsResponse.status);
+          }
+        } catch (err) {
+          console.error("Error fetching connections:", err);
+        } finally {
+          setConnectionsLoading(false);
+        }
+      }
     } catch (error) {
       console.error("Error fetching icebreaker data:", error);
       setError("Failed to fetch data");
@@ -759,6 +760,32 @@ function ViewIcebreaker() {
   }, [uid]);
 
   const profile = iceData?.profiles?.[0];
+
+  // Transform profile for the graph component
+  const graphProfile = useMemo(() => {
+    if (!profile) return null;
+    
+    return {
+      profileID: profile.profileID,
+      displayName: profile.displayName,
+      avatarUrl: profile.avatarUrl ? extractDirectImageUrl(profile.avatarUrl) : undefined,
+      bio: profile.bio,
+      type: 'main' as const,
+    };
+  }, [profile]);
+
+  // Transform connections for the graph component
+  const graphConnections = useMemo(() => {
+    if (!connections.length) return [];
+    
+    return connections.map(conn => ({
+      profileID: conn.profileID,
+      displayName: conn.displayName,
+      avatarUrl: conn.avatarUrl ? extractDirectImageUrl(conn.avatarUrl) : undefined,
+      bio: conn.bio,
+      type: 'connection' as const,
+    }));
+  }, [connections]);
 
   return (
     <>
@@ -785,143 +812,77 @@ function ViewIcebreaker() {
         onClick={icebreaker}
         disabled={loading}
       >
-        {loading ? "Loading..." : "View Icebreaker"}
+        {loading ? "Loading..." : "View Icebreaker Profile"}
       </Button>
       {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
       {iceData && profile && (
-        <div className="my-2 p-2 text-xs overflow-x-scroll bg-gray-100 rounded-lg font-mono">
-          <div className="font-semibold text-gray-500 mb-1">Icebreaker Data</div>
-          <div className="whitespace-pre-wrap text-gray-700">
-            {/* Basic profile information */}
-            {profile.displayName && (
-              <div className="mb-1">
-                <span className="font-bold">Name:</span> {profile.displayName}
-              </div>
-            )}
-            
-            {/* Find Farcaster username from channels */}
-            {profile.channels && profile.channels.find(c => c.type === "farcaster") && (
-              <div className="mb-1">
-                <span className="font-bold">Farcaster:</span> @{profile.channels.find(c => c.type === "farcaster")?.value}
-              </div>
-            )}
-            
-            {/* Find FID from Farcaster channel metadata */}
-            {profile.channels && profile.channels.find(c => c.type === "farcaster")?.metadata?.find(m => m.name === "fid") && (
-              <div className="mb-1">
-                <span className="font-bold">FID:</span> {profile.channels.find(c => c.type === "farcaster")?.metadata?.find(m => m.name === "fid")?.value}
-              </div>
-            )}
-            
-            {profile.avatarUrl && (
-              <div className="mb-1">
-                <span className="font-bold">Profile Image:</span> 
-                <img 
-                  src={extractDirectImageUrl(profile.avatarUrl)}
-                  alt={`${profile.displayName || 'User'}'s profile`}
-                  className="mt-1 rounded-full w-12 h-12 object-cover" 
-                  onError={(e) => {
-                    // Fallback to a generic avatar if the image fails to load
-                    const target = e.target as HTMLImageElement;
-                    target.onerror = null; // Prevent infinite loop
-                    target.src = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
-                  }}
-                />
-              </div>
-            )}
-            
-            {profile.bio && (
-              <div className="mb-1">
-                <span className="font-bold">Bio:</span> {profile.bio}
-              </div>
-            )}
-            
-            {profile.walletAddress && (
-              <div className="mb-1">
-                <span className="font-bold">Wallet Address:</span> {profile.walletAddress}
-              </div>
-            )}
-            
-            {profile.jobTitle && (
-              <div className="mb-1">
-                <span className="font-bold">Job Title:</span> {profile.jobTitle}
-              </div>
-            )}
-            
-            {profile.primarySkill && (
-              <div className="mb-1">
-                <span className="font-bold">Primary Skill:</span> {profile.primarySkill}
-              </div>
-            )}
-            
-            {/* Social channels */}
-            {profile.channels && profile.channels.length > 0 && (
-              <div className="mb-1">
-                <span className="font-bold">Social Channels:</span>
-                <ul className="pl-4 mt-1">
-                  {profile.channels.map((channel, i) => (
-                    <li key={i}>
-                      <strong className="capitalize">{channel.type}:</strong>{" "}
-                      {channel.url ? (
-                        <a href={channel.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                          {channel.value || channel.url}
-                        </a>
-                      ) : (
-                        channel.value
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {/* Credentials */}
-            {profile.credentials && profile.credentials.length > 0 && (
-              <div className="mb-1">
-                <span className="font-bold">Credentials:</span>
-                <ul className="pl-4 mt-1">
-                  {profile.credentials.slice(0, 5).map((credential, i) => (
-                    <li key={i} className="mb-0.5">
-                      {credential.name}
-                      {credential.chain && <span className="text-gray-500 ml-1">({credential.chain})</span>}
-                    </li>
-                  ))}
-                  {profile.credentials.length > 5 && (
-                    <li className="text-gray-500">+ {profile.credentials.length - 5} more credentials</li>
-                  )}
-                </ul>
-              </div>
-            )}
-            
-            {/* Events */}
-            {profile.events && profile.events.length > 0 && (
-              <div className="mb-1">
-                <span className="font-bold">Recent Events:</span>
-                <ul className="pl-4 mt-1">
-                  {profile.events.slice(0, 3).map((event, i) => (
-                    <li key={i} className="mb-0.5">
-                      {event.name}
-                      {event.year && <span className="text-gray-500 ml-1">({event.year})</span>}
-                    </li>
-                  ))}
-                  {profile.events.length > 3 && (
-                    <li className="text-gray-500">+ {profile.events.length - 3} more events</li>
-                  )}
-                </ul>
-              </div>
-            )}
-            
-            {/* Raw data section */}
-            <div className="mt-2 pt-2 border-t border-gray-300">
-              <details>
-                <summary className="cursor-pointer text-gray-500 hover:text-gray-700">View raw data</summary>
-                <div className="mt-2 whitespace-pre text-gray-500">
-                  {JSON.stringify(iceData.profiles[0], null, 2)}
+        <>
+          <div className="my-2 p-2 text-xs overflow-x-scroll bg-gray-100 rounded-lg font-mono">
+            <div className="font-semibold text-gray-500 mb-1">Icebreaker Data</div>
+            <div className="whitespace-pre-wrap text-gray-700">
+              {/* Basic profile information */}
+              {profile.displayName && (
+                <div className="mb-1">
+                  <span className="font-bold">Name:</span> {profile.displayName}
                 </div>
-              </details>
+              )}
+              
+              {/* Find Farcaster username from channels */}
+              {profile.channels && profile.channels.find(c => c.type === "farcaster") && (
+                <div className="mb-1">
+                  <span className="font-bold">Farcaster:</span> @{profile.channels.find(c => c.type === "farcaster")?.value}
+                </div>
+              )}
+              
+              {/* Find FID from Farcaster channel metadata */}
+              {profile.channels && profile.channels.find(c => c.type === "farcaster")?.metadata?.find(m => m.name === "fid") && (
+                <div className="mb-1">
+                  <span className="font-bold">FID:</span> {profile.channels.find(c => c.type === "farcaster")?.metadata?.find(m => m.name === "fid")?.value}
+                </div>
+              )}
+              
+              {profile.avatarUrl && (
+                <div className="mb-1">
+                  <span className="font-bold">Profile Image:</span> 
+                  <img 
+                    src={extractDirectImageUrl(profile.avatarUrl)}
+                    alt={`${profile.displayName || 'User'}'s profile`}
+                    className="mt-1 rounded-full w-12 h-12 object-cover" 
+                    onError={(e) => {
+                      // Fallback to a generic avatar if the image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null; // Prevent infinite loop
+                      target.src = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
+                    }}
+                  />
+                </div>
+              )}
+              
+              {/* Rest of your profile display code... */}
+              
+              {/* Raw data section */}
+              <div className="mt-2 pt-2 border-t border-gray-300">
+                <details>
+                  <summary className="cursor-pointer text-gray-500 hover:text-gray-700">View raw data</summary>
+                  <div className="mt-2 whitespace-pre text-gray-500">
+                    {JSON.stringify(iceData.profiles[0], null, 2)}
+                  </div>
+                </details>
+              </div>
             </div>
           </div>
-        </div>
+          
+          {/* Add the social graph component with properly transformed data */}
+          {!connectionsLoading && connections.length > 0 && graphProfile && (
+            <div className="mt-4">
+              <IcebreakerGraph profile={graphProfile} connections={graphConnections} />
+            </div>
+          )}
+          
+          {connectionsLoading && (
+            <div className="mt-4 text-xs text-gray-500">Loading network connections...</div>
+          )}
+        </>
       )}
     </>
   );
