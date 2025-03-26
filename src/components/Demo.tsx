@@ -30,6 +30,7 @@ import { useSession } from "next-auth/react";
 import { createStore } from "mipd";
 import { Label } from "~/components/ui/label";
 
+
 export default function Demo(
   { title }: { title?: string } = { title: "Frames v2 Demo" }
 ) {
@@ -103,9 +104,15 @@ export default function Demo(
 
   useEffect(() => {
     const load = async () => {
-      const context = await sdk.context;
-      setContext(context);
-      setAdded(context.client.added);
+      try{
+        const context = await sdk.context;
+        setContext(context);
+        setAdded(context.client.added);
+      } catch (error) {
+        console.error("Error loading context:", error);
+      }
+      
+      
 
       sdk.on("frameAdded", ({ notificationDetails }) => {
         setLastEvent(
@@ -170,6 +177,7 @@ export default function Demo(
   const openWarpcastUrl = useCallback(() => {
     sdk.actions.openUrl("https://warpcast.com/~/compose");
   }, []);
+  
 
   const close = useCallback(() => {
     sdk.actions.close();
@@ -269,6 +277,7 @@ export default function Demo(
   const toggleContext = useCallback(() => {
     setIsContextOpen((prev) => !prev);
   }, []);
+  
 
   if (!isSDKLoaded) {
     return <div>Loading...</div>;
@@ -304,7 +313,7 @@ export default function Demo(
 
           {isContextOpen && (
             <div className="p-4 mt-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-              <pre className="font-mono text-xs whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
+              <pre className="font-mono text-xs text-gray-500 whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
                 {JSON.stringify(context, null, 2)}
               </pre>
             </div>
@@ -315,56 +324,28 @@ export default function Demo(
           <h2 className="font-2xl font-bold">Actions</h2>
 
           <div className="mb-4">
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg my-2">
-              <pre className="font-mono text-xs whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
-                sdk.actions.signIn
-              </pre>
-            </div>
-            <SignIn />
-          </div>
-
-          <div className="mb-4">
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg my-2">
-              <pre className="font-mono text-xs whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
-                sdk.actions.openUrl
-              </pre>
-            </div>
-            <Button onClick={openUrl}>Open Link</Button>
-          </div>
-
-          <div className="mb-4">
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg my-2">
-              <pre className="font-mono text-xs whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
-                sdk.actions.openUrl
-              </pre>
-            </div>
-            <Button onClick={openWarpcastUrl}>Open Warpcast Link</Button>
-          </div>
-
-          <div className="mb-4">
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg my-2">
-              <pre className="font-mono text-xs whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
-                sdk.actions.viewProfile
-              </pre>
-            </div>
             <ViewIcebreaker />
           </div>
 
           <div className="mb-4">
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg my-2">
-              <pre className="font-mono text-xs whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
-                sdk.actions.viewProfile
-              </pre>
-            </div>
+            <SignIn />
+          </div>
+
+          <div className="mb-4">
+            <Button onClick={openUrl}>Open Link</Button>
+          </div>
+
+          <div className="mb-4">
+            <Button onClick={openWarpcastUrl}>Open Warpcast Link</Button>
+          </div>
+
+          
+
+          <div className="mb-4">
             <ViewProfile />
           </div>
 
           <div className="mb-4">
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg my-2">
-              <pre className="font-mono text-xs whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
-                sdk.actions.close
-              </pre>
-            </div>
             <Button onClick={close}>Close Frame</Button>
           </div>
         </div>
@@ -373,7 +354,7 @@ export default function Demo(
           <h2 className="font-2xl font-bold">Last event</h2>
 
           <div className="p-4 mt-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-            <pre className="font-mono text-xs whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
+            <pre className="font-mono text-xs text-gray-500 whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
               {lastEvent || "none"}
             </pre>
           </div>
@@ -391,11 +372,6 @@ export default function Demo(
           </div>
 
           <div className="mb-4">
-            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg my-2">
-              <pre className="font-mono text-xs whitespace-pre-wrap break-words max-w-[260px] overflow-x-">
-                sdk.actions.addFrame
-              </pre>
-            </div>
             {addFrameResult && (
               <div className="mb-2 text-sm">
                 Add frame result: {addFrameResult}
@@ -673,13 +649,13 @@ function SignIn() {
       {signInFailure && !signingIn && (
         <div className="my-2 p-2 text-xs overflow-x-scroll bg-gray-100 rounded-lg font-mono">
           <div className="font-semibold text-gray-500 mb-1">SIWF Result</div>
-          <div className="whitespace-pre">{signInFailure}</div>
+          <div className="whitespace-pre text-gray-500">{signInFailure}</div>
         </div>
       )}
       {signInResult && !signingIn && (
         <div className="my-2 p-2 text-xs overflow-x-scroll bg-gray-100 rounded-lg font-mono">
           <div className="font-semibold text-gray-500 mb-1">SIWF Result</div>
-          <div className="whitespace-pre">
+          <div className="whitespace-pre text-gray-500">
             {JSON.stringify(signInResult, null, 2)}
           </div>
         </div>
@@ -688,8 +664,101 @@ function SignIn() {
   );
 }
 function ViewIcebreaker() {
+  // Helper function to extract the direct image URL from a Cloudinary URL
+  const extractDirectImageUrl = (cloudinaryUrl: string) => {
+    try {
+      // Check if it's a cloudinary URL with the format we expect
+      if (cloudinaryUrl.includes('cloudinary.com/merkle-manufactory/image/fetch')) {
+        // Extract the original image URL after the last slash
+        const matches = cloudinaryUrl.match(/\/https?:\/\/(.+)$/);
+        if (matches && matches[0]) {
+          // Return the actual image URL (remove the leading slash)
+          return matches[0].substring(1);
+        }
+      }
+      return cloudinaryUrl;
+    } catch (error) { 
+      // If not a cloudinary URL or no match, return the original
+      console.error('Error extracting image URL:', error);
+      return cloudinaryUrl;
+    }
+  };
+    
+
+  // Update the interface to match the actual data structure
+  interface Channel {
+    type: string;
+    isVerified: boolean;
+    isLocked: boolean;
+    value: string;
+    url: string;
+    metadata?: Array<{name: string, value: string}>;
+  }
+
+  interface Credential {
+    name: string;
+    chain?: string;
+    source?: string;
+    reference?: string;
+  }
+
+  interface Event {
+    id: string;
+    source: string;
+    name: string;
+    description: string;
+    imageUrl: string;
+    startDate: string;
+    endDate: string;
+    city?: string;
+    country?: string;
+    year: string;
+  }
+
+  interface IcebreakerProfile {
+    profileID: string;
+    walletAddress: string;
+    avatarUrl: string;
+    displayName: string;
+    bio: string;
+    jobTitle?: string;
+    primarySkill?: string;
+    networkingStatus?: string;
+    location?: string;
+    channels: Channel[];
+    credentials: Credential[];
+    events: Event[];
+    highlights?: any[];
+    workExperience?: any[];
+    guilds?: any[];
+  }
+
+  interface IcebreakerData {
+    profiles: IcebreakerProfile[];
+  }
+
   const [uid, setFid] = useState("3");
-  
+  const [iceData, setIceData] = useState<IcebreakerData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const icebreaker = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/icebreaker/${uid}`);
+      const data = await response.json();
+      console.log("Raw Icebreaker data:", data);
+      setIceData(data);
+    } catch (error) {
+      console.error("Error fetching icebreaker data:", error);
+      setError("Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
+  }, [uid]);
+
+  const profile = iceData?.profiles?.[0];
 
   return (
     <>
@@ -698,9 +767,9 @@ function ViewIcebreaker() {
           className="text-xs font-semibold text-gray-500 mb-1"
           htmlFor="view-profile-fid"
         >
-          User ID
+          FID
         </Label>
-        <Input
+        <Input 
           id="view-profile-fid"
           type="number"
           value={uid}
@@ -713,17 +782,147 @@ function ViewIcebreaker() {
         />
       </div>
       <Button
-        onClick={() => {
-          const options = {method: 'GET', headers: {accept: 'application/json'}};
-
-          fetch('https://app.icebreaker.xyz/api/v1/fid/3/', options)
-            .then(res => res.json())
-            .then(res => console.log(res))
-            .catch(err => console.error(err));
-        }}
+        onClick={icebreaker}
+        disabled={loading}
       >
-        View Icebreaker
+        {loading ? "Loading..." : "View Icebreaker"}
       </Button>
+      {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
+      {iceData && profile && (
+        <div className="my-2 p-2 text-xs overflow-x-scroll bg-gray-100 rounded-lg font-mono">
+          <div className="font-semibold text-gray-500 mb-1">Icebreaker Data</div>
+          <div className="whitespace-pre-wrap text-gray-700">
+            {/* Basic profile information */}
+            {profile.displayName && (
+              <div className="mb-1">
+                <span className="font-bold">Name:</span> {profile.displayName}
+              </div>
+            )}
+            
+            {/* Find Farcaster username from channels */}
+            {profile.channels && profile.channels.find(c => c.type === "farcaster") && (
+              <div className="mb-1">
+                <span className="font-bold">Farcaster:</span> @{profile.channels.find(c => c.type === "farcaster")?.value}
+              </div>
+            )}
+            
+            {/* Find FID from Farcaster channel metadata */}
+            {profile.channels && profile.channels.find(c => c.type === "farcaster")?.metadata?.find(m => m.name === "fid") && (
+              <div className="mb-1">
+                <span className="font-bold">FID:</span> {profile.channels.find(c => c.type === "farcaster")?.metadata?.find(m => m.name === "fid")?.value}
+              </div>
+            )}
+            
+            {profile.avatarUrl && (
+              <div className="mb-1">
+                <span className="font-bold">Profile Image:</span> 
+                <img 
+                  src={extractDirectImageUrl(profile.avatarUrl)}
+                  alt={`${profile.displayName || 'User'}'s profile`}
+                  className="mt-1 rounded-full w-12 h-12 object-cover" 
+                  onError={(e) => {
+                    // Fallback to a generic avatar if the image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.onerror = null; // Prevent infinite loop
+                    target.src = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png";
+                  }}
+                />
+              </div>
+            )}
+            
+            {profile.bio && (
+              <div className="mb-1">
+                <span className="font-bold">Bio:</span> {profile.bio}
+              </div>
+            )}
+            
+            {profile.walletAddress && (
+              <div className="mb-1">
+                <span className="font-bold">Wallet Address:</span> {profile.walletAddress}
+              </div>
+            )}
+            
+            {profile.jobTitle && (
+              <div className="mb-1">
+                <span className="font-bold">Job Title:</span> {profile.jobTitle}
+              </div>
+            )}
+            
+            {profile.primarySkill && (
+              <div className="mb-1">
+                <span className="font-bold">Primary Skill:</span> {profile.primarySkill}
+              </div>
+            )}
+            
+            {/* Social channels */}
+            {profile.channels && profile.channels.length > 0 && (
+              <div className="mb-1">
+                <span className="font-bold">Social Channels:</span>
+                <ul className="pl-4 mt-1">
+                  {profile.channels.map((channel, i) => (
+                    <li key={i}>
+                      <strong className="capitalize">{channel.type}:</strong>{" "}
+                      {channel.url ? (
+                        <a href={channel.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                          {channel.value || channel.url}
+                        </a>
+                      ) : (
+                        channel.value
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Credentials */}
+            {profile.credentials && profile.credentials.length > 0 && (
+              <div className="mb-1">
+                <span className="font-bold">Credentials:</span>
+                <ul className="pl-4 mt-1">
+                  {profile.credentials.slice(0, 5).map((credential, i) => (
+                    <li key={i} className="mb-0.5">
+                      {credential.name}
+                      {credential.chain && <span className="text-gray-500 ml-1">({credential.chain})</span>}
+                    </li>
+                  ))}
+                  {profile.credentials.length > 5 && (
+                    <li className="text-gray-500">+ {profile.credentials.length - 5} more credentials</li>
+                  )}
+                </ul>
+              </div>
+            )}
+            
+            {/* Events */}
+            {profile.events && profile.events.length > 0 && (
+              <div className="mb-1">
+                <span className="font-bold">Recent Events:</span>
+                <ul className="pl-4 mt-1">
+                  {profile.events.slice(0, 3).map((event, i) => (
+                    <li key={i} className="mb-0.5">
+                      {event.name}
+                      {event.year && <span className="text-gray-500 ml-1">({event.year})</span>}
+                    </li>
+                  ))}
+                  {profile.events.length > 3 && (
+                    <li className="text-gray-500">+ {profile.events.length - 3} more events</li>
+                  )}
+                </ul>
+              </div>
+            )}
+            
+            {/* Raw data section */}
+            <div className="mt-2 pt-2 border-t border-gray-300">
+              <details>
+                <summary className="cursor-pointer text-gray-500 hover:text-gray-700">View raw data</summary>
+                <div className="mt-2 whitespace-pre text-gray-500">
+                  {JSON.stringify(iceData.profiles[0], null, 2)}
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
