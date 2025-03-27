@@ -6,7 +6,7 @@ import { Providers } from "~/app/providers";
 
 export const metadata: Metadata = {
   title: "Icebreaker Profile Viewer",
-  description: "View Icebreaker profiles and generate credential networks",
+  description: "View Icebreaker profiles and generate credential networks.",
 };
 
 export default async function RootLayout({

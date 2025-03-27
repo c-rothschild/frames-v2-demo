@@ -10,7 +10,7 @@ const frame = {
     title: "Launch Frame",
     action: {
       type: "launch_frame",
-      name: "Farcaster Frames v2 Demo",
+      name: "Icebreaker Profile Viewer",
       url: appUrl,
       splashImageUrl: `${appUrl}/splash.png`,
       splashBackgroundColor: "#f7f7f7",
@@ -24,8 +24,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Icebreaker Profile Viewer",
     openGraph: {
-      title: "Farcaster Frames v2 Demo",
-      description: "A Farcaster Frames v2 demo app.",
+      title: "Icebreaker Profile Viewer",
+      description: "View Icebreaker profiles and generate credential networks.",
     },
     other: {
       "fc:frame": JSON.stringify(frame),
