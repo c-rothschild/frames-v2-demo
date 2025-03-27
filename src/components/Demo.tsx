@@ -503,6 +503,18 @@ function ViewIcebreaker() {
               <IcebreakerGraph profile={graphProfile} connections={graphConnections} />
             </div>
           )}
+
+          {/* Add a message when credentials are fetched but no connections found */}
+          {!connectionsLoading && connections.length === 0 && selectedCredentialName && (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold mb-2">
+                Network of Profiles Sharing the Credential "{selectedCredentialName}"
+              </h3>
+              <div className="bg-gray-50 p-6 rounded-lg text-center text-gray-500 border border-gray-200">
+                No connections found for this credential
+              </div>
+            </div>
+          )}
           
           {connectionsLoading && (
             <div className="mt-4 text-xs text-gray-500">Loading network connections...</div>
