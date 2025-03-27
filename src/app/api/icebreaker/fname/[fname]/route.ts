@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
-  { params }: { params: { fid: string } }
+  { params }: { params: { fname: string } }
 ) {
-  const fid = params.fid;
+  const fname = params.fname;
   
   try {
-    const response = await fetch(`https://app.icebreaker.xyz/api/v1/fid/${fid}/`, {
+    const response = await fetch(`https://app.icebreaker.xyz/api/v1/fname/${fname}/`, {
       method: 'GET',
       headers: { accept: 'application/json' },
     });

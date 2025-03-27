@@ -5,8 +5,8 @@ import "~/app/globals.css";
 import { Providers } from "~/app/providers";
 
 export const metadata: Metadata = {
-  title: "Farcaster Frames v2 Demo",
-  description: "A Farcaster Frames v2 demo app",
+  title: "Icebreaker Profile Viewer",
+  description: "View Icebreaker profiles and generate credential networks",
 };
 
 export default async function RootLayout({
