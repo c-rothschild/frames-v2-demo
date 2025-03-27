@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export async function GET(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { credentialName: string } }
 ) {
   // Get the raw credential name from params
