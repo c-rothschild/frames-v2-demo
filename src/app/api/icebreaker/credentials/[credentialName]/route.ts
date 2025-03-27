@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
-  request: Request,
-  { params }: { params: { credentialName: string } }
+  request: NextRequest,
+  context: { params: { credentialName: string } }
 ) {
   // Get the raw credential name from params
-  const rawCredentialName = params.credentialName;
+  const rawCredentialName = context.params.credentialName;
   
   // URL-encode the credential name to handle special characters
   const encodedCredentialName = encodeURIComponent(rawCredentialName);
