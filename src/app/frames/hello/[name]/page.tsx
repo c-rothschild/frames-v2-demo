@@ -1,7 +1,8 @@
 import { Metadata } from "next";
 import App from "~/app/app";
 
-const appUrl = process.env.NEXT_PUBLIC_URL;
+// Make sure this is your actual deployed URL
+const appUrl = process.env.NEXT_PUBLIC_URL || "https://frames-v2-demo.vercel.app";
 
 interface Props {
   params: Promise<{
@@ -13,18 +14,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;
 
   const frame = {
-    version: "next",
-    imageUrl: `${appUrl}/icebreaker_labs_logo.jpeg`,
-    button: {
-      title: "Launch Frame",
-      action: {
-        type: "launch_frame",
-        name: "Farcaster Frames v2 Demo",
-        url: `${appUrl}/frames/hello/${name}/`,
-        splashImageUrl: `${appUrl}/splash.png`,
-        splashBackgroundColor: "#f7f7f7",
-      },
-    },
+    version: "vNext",
+    image: `${appUrl}/icebreaker_labs_logo.png`,
+    buttons: [
+      {
+        label: "Launch Frame",
+        action: "post"
+      }
+    ],
+    post_url: `${appUrl}/api/frames/hello`,
+    og: {
+      title: `Hello, ${name}`,
+      description: `A personalized hello frame for ${name}`
+    }
   };
 
   return {
@@ -33,9 +35,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `Hello, ${name}`,
       description: `A personalized hello frame for ${name}`,
+      images: [`${appUrl}/icebreaker_labs_logo.jpeg`],
     },
     other: {
-      "fc:frame": JSON.stringify(frame),
+      // This is the crucial part that Warpcast looks for
+      "fc:frame": "vNext",
+      "fc:frame:image": `${appUrl}/icebreaker_labs_logo.jpeg`,
+      "fc:frame:button:1": "Launch Frame",
+      "fc:frame:button:1:action": "post",
+      "fc:frame:post_url": `${appUrl}/api/frames/hello`,
     },
   };
 }
