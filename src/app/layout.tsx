@@ -23,7 +23,7 @@ export default async function RootLayout({
         <meta property="og:title" content={'Icebreaker Profile Viewer'} />
         <meta property="og:image" content={`${config.hostUrl}/icebreaker_labs_logo.jpeg`} />
         <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:image" content={`${config.hostUrl}/icebreaker_labs_logo.jpeg`}/>
+        <meta property="fc:frame:imageUrl" content={`${config.hostUrl}/icebreaker_labs_logo.jpeg`}/>
         
       </head>
       <body>
