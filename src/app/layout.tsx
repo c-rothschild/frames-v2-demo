@@ -20,11 +20,6 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta property="og:title" content={'PEEPEEPOOPOO'} />
-        <meta property="og:image" content={`${config.hostUrl}/icebreaker_labs_logo.jpeg`} />
-        <meta property="fc:frame" content="vNext" />
-        <meta property="fc:frame:imageUrl" content={`${config.hostUrl}/icebreaker_labs_logo.jpeg`}/>
-        
       </head>
       <body>
         <Providers session={session}>{children}</Providers>
