@@ -20,6 +20,7 @@ import {
   useSwitchChain,
   useChainId,
 } from "wagmi";
+import Provider from "~/components/providers/WagmiProvider";
 
 import { config } from "~/components/providers/WagmiProvider";
 import { Button } from "~/components/ui/Button";
