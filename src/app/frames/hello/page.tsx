@@ -5,7 +5,7 @@ const appUrl = process.env.NEXT_PUBLIC_URL;
 
 const frame = {
   version: "next",
-  imageUrl: `${appUrl}/frames/hello/opengraph-image`,
+  imageUrl: `${appUrl}/icebreaker_labs_logo.png`,
   button: {
     title: "Launch Frame",
     action: {
