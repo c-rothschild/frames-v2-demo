@@ -5,7 +5,8 @@ const appUrl = process.env.NEXT_PUBLIC_URL;
 
 const frame = {
   version: "next",
-  imageUrl: `${appUrl}/icebreaker_labs_logo.jpeg`,
+  imageUrl: `${appUrl}/icebreaker_labs_logo.png`,
+  aspectRatio: "3:2",
   button: {
     title: "Launch Frame",
     action: {
